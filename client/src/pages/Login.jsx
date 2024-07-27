@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
@@ -12,12 +13,30 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
   const handleChange = (e) => {
-    setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    const sanitizedValue = DOMPurify.sanitize(value);
+
+    setInputs((prev) => ({ ...prev, [name]: sanitizedValue }));
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const { username, password } = inputs;
+    console.log(password);
+
     try {
+      console.log(inputs);
+      if (
+        !/^[a-zA-Z0-9]*$/.test(username) &&
+        !/^[a-zA-Z0-9]*$/.test(password)
+      ) {
+        console.log("aló");
+        setError("Special characters are not allowed.");
+        setTimeout(() => setError(null), 3000);
+
+        return;
+      }
       await login(inputs);
+
       navigate("/");
     } catch (err) {
       setError(err.response.data);
@@ -52,6 +71,13 @@ const Login = () => {
           type="password"
           placeholder="Contraseña"
           name="password"
+          onChange={handleChange}
+        />
+        <input
+          required
+          type="text"
+          placeholder="Código 2FA"
+          name="token"
           onChange={handleChange}
         />
         <button onClick={handleSubmit}>Iniciar Sesion</button>

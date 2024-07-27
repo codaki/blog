@@ -1,33 +1,39 @@
+import axios from "axios";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import Edit from "../img/logo3.png";
+
 const Register = () => {
   const [inputs, setInputs] = useState({
     username: "",
     email: "",
     password: "",
   });
+  const [qrCode, setQrCode] = useState(null);
   const [err, setError] = useState(null);
   const navigate = useNavigate();
+
   const handleChange = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/auth/register", inputs);
-      navigate("/login");
+      const res = await axios.post("/auth/register", inputs);
+      setQrCode(res.data.qr_code);
+      setTimeout(() => navigate("/login"), 10000);
     } catch (err) {
       setError(err.response.data);
     }
   };
+
   return (
     <div className="auth">
       <Link to="/">
         <img src={Edit} alt="logo" width="350px" border="0" />
       </Link>
-      <form>
+      <form onSubmit={handleSubmit}>
         <center>
           <h1>Registrarse</h1>
         </center>
@@ -49,25 +55,31 @@ const Register = () => {
         <input
           required
           type="email"
-          placeholder="correo"
+          placeholder="Correo"
           name="email"
           onChange={handleChange}
         />
         <input
           required
           type="password"
-          placeholder="contraseña"
+          placeholder="Contraseña"
           name="password"
           onChange={handleChange}
         />
-        <button onClick={handleSubmit}> Registrate</button>
+        <button type="submit">Registrate</button>
         {err && <p>{err}</p>}
+        {qrCode && (
+          <div>
+            <p>Escanea este código QR con tu aplicación de autenticación:</p>
+            <img src={qrCode} alt="Código QR para 2FA" />
+          </div>
+        )}
         <span>
           Tienes una cuenta? <Link to="/login">Inicio Sesion</Link>
         </span>
       </form>
-         
     </div>
   );
 };
+
 export default Register;

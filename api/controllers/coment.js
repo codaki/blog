@@ -1,6 +1,7 @@
+import { config } from "dotenv";
 import jwt from "jsonwebtoken";
 import { db } from "../db.js";
-
+config();
 export const getComments = (req, res) => {
   const q =
     "select c.id, u.username, c.coment,c.date from coment c inner join users u on c.idU = u.id where c.pid=?";
@@ -16,7 +17,7 @@ export const addComments = (req, res) => {
   const token = req.cookies.access_token;
   if (!token) return res.status(401).json("No autenticado!");
 
-  jwt.verify(token, "jwtkey", (err, userInfo) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, userInfo) => {
     if (err) return res.status(403).json("Token no es valido!");
     const q = "INSERT INTO coment(`coment`, `date`, `idU`, `pid`) VALUES (?)";
     const values = [req.body.coment, req.body.date, userInfo.id, req.body.pid];

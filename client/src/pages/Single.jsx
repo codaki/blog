@@ -18,7 +18,10 @@ const Single = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [listaComent, setListaComent] = useState([]);
-
+  const handleChange = (content) => {
+    const sanitizedContent = DOMPurify.sanitize(content);
+    setValue(sanitizedContent);
+  };
   const postId = location.pathname.split("/")[2];
 
   const { currentUser } = useContext(AuthContext);
@@ -73,7 +76,10 @@ const Single = () => {
     }
   };
   const getText = (html) => {
-    const doc = new DOMParser().parseFromString(html, "text/html");
+    const doc = new DOMParser().parseFromString(
+      DOMPurify.sanitize(html),
+      "text/html"
+    );
     return doc.body.textContent;
   };
 
@@ -143,7 +149,7 @@ const Single = () => {
             className="editor"
             theme="snow"
             value={value}
-            onChange={setValue}
+            onChange={handleChange}
           />
         </div>
         <button onClick={handleClick1}>Publicar</button>

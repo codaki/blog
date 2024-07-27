@@ -1,18 +1,18 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import Menu from "../components/Menu";
-import Edit from "../img/edit.png";
-import Delete from "../img/delete.png";
 import axios from "axios";
+import DOMPurify from "isomorphic-dompurify";
 import moment from "moment";
 import "moment/locale/es";
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import React, { useContext, useEffect, useState } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import Menu from "../components/Menu";
 import { AuthContext } from "../context/authContext";
-import DOMPurify from "isomorphic-dompurify";
+import Delete from "../img/delete.png";
+import Edit from "../img/edit.png";
 
 const Single = () => {
-    const [value, setValue] = useState( '');
+  const [value, setValue] = useState("");
   const [post, setPost] = useState({});
   // const [comment, setComment] = useState({});
   const location = useLocation();
@@ -40,10 +40,8 @@ const Single = () => {
     const fetchData = async () => {
       try {
         const res = await axios.get(`/coment/${postId}`);
-        //console.log(res.data);
-        //setComment(res.data);
+
         setListaComent(res.data);
-        //console.log(listaComent);
       } catch (err) {
         console.log(err);
       }
@@ -60,27 +58,24 @@ const Single = () => {
     }
   };
 
-    const handleClick1 = async e=>{
-        e.preventDefault()
+  const handleClick1 = async (e) => {
+    e.preventDefault();
 
-        try{
-            await axios.post(`/coment/`,{
-                
-                coment:value,
-                date: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
-                pid:postId,
-            });
-            window.location.reload();
-
-        }catch(err){
-            console.log(err)
-        }
-
+    try {
+      await axios.post(`/coment/`, {
+        coment: value,
+        date: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
+        pid: postId,
+      });
+      window.location.reload();
+    } catch (err) {
+      console.log(err);
     }
+  };
   const getText = (html) => {
-        const doc = new DOMParser().parseFromString(html, "text/html")
-        return doc.body.textContent
-    }
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return doc.body.textContent;
+  };
 
   // const handleComment = async (e) => {
   //     e.preventDefault();
@@ -130,28 +125,28 @@ const Single = () => {
             {listaComent.map((val) => {
               return (
                 <div className="coment" key={val.id}>
-                    <div className="container1">
-                  <div className= "username">
-                    <p>{val.username}</p>
+                  <div className="container1">
+                    <div className="username">
+                      <p>{val.username}</p>
                     </div>
-                    <div className="date">
-                    {val.date.slice(0, 10)}
-                    </div>
-                    </div>
-                    <p>{getText(val.coment)}</p>
-                    <div className="container2">
-                  
-                    </div>
-                  
+                    <div className="date">{val.date.slice(0, 10)}</div>
+                  </div>
+                  <p>{getText(val.coment)}</p>
+                  <div className="container2"></div>
                 </div>
               );
             })}
           </div>
         </div>
         <div className="editorContainer">
-                    <ReactQuill className="editor" theme="snow" value={value} onChange={setValue} />
-                </div>
-                <button onClick={handleClick1}>Publicar</button>
+          <ReactQuill
+            className="editor"
+            theme="snow"
+            value={value}
+            onChange={setValue}
+          />
+        </div>
+        <button onClick={handleClick1}>Publicar</button>
       </div>
       <Menu cat={post.cat} />
     </div>

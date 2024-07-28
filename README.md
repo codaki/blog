@@ -1,6 +1,6 @@
-# Mi Aplicación React
+# Blog Educativo
 
-Esta es una aplicación React con una API backend. Sigue las instrucciones a continuación para configurar y ejecutar el proyecto.
+Aplicación React con una API backend. Sigue las instrucciones a continuación para configurar y ejecutar el proyecto.
 
 ## Requisitos previos
 
@@ -44,6 +44,10 @@ Esta es una aplicación React con una API backend. Sigue las instrucciones a con
 ### Base de datos
 
 Asegúrate de utilizar la base de datos blog.sql proporcionada en la carpeta `base de datos`.
+
+### Certificados
+
+Crear una carpeta certi en la cual se deben generar los archivos .pem para el certificado y la llave pública.
 
 ## Implementación de medidas de seguridad
 

@@ -40,7 +40,7 @@ Esta es una aplicación React con una API backend. Sigue las instrucciones a con
 
 ### Base de datos
 
-Asegúrate de utilizar la base de datos proporcionada en la carpeta `base de datos`.
+Asegúrate de utilizar la base de datos blog.sql proporcionada en la carpeta `base de datos`.
 
 ## Ejecución de la aplicación
 

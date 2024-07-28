@@ -37,6 +37,9 @@ Esta es una aplicación React con una API backend. Sigue las instrucciones a con
     ```sh
     JWT_SECRET = "]K@l9w6SnF3"
     ```
+### Certificados
+
+Crear una carpeta certi en la cual se deben generar los archivos .pem para el certificado y la llave pública.
 
 ### Base de datos
 

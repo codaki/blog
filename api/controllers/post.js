@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import jwt from "jsonwebtoken";
 import { db } from "../db.js";
+import e from "express";
 config();
 export const getPosts = (req, res) => {
   const q = req.query.cat
@@ -15,7 +16,7 @@ export const getPosts = (req, res) => {
 
 export const getPost = (req, res) => {
   const q =
-    "SELECT p.id,`username`, `title`, `desc`, p.img, u.img AS userImg, `cat`,`date` FROM users u JOIN posts p ON u.id = p.uid WHERE p.id = ? ";
+    "SELECT p.id,`username`, `title`, `desc`, p.img, u.img AS userImg, `cat`,`date`, p.post_likes, p.post_dislikes FROM users u JOIN posts p ON u.id = p.uid WHERE p.id = ? ";
 
   db.query(q, [req.params.id], (err, data) => {
     if (err) return res.status(500).json(err);
@@ -59,7 +60,7 @@ export const deletePost = (req, res) => {
     const q = "DELETE FROM posts WHERE `id`=? ";
     db.query(q, [postId], (err, data) => {
       if (err)
-        return res.status(403).json("Tu puedes borrar unicamente tus posts!");
+        return res.status(403).json("Tú puedes borrar unicamente tus posts!");
       return res.json("El Post ha sido eliminado");
     });
   });
@@ -83,3 +84,47 @@ export const updatePost = (req, res) => {
     });
   });
 };
+
+export const likePost = (req, res) => {
+  const token = req.cookies.access_token;
+  if (!token) return res.status(401).json("No autenticado!");
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, userInfo) => {
+    if (err) return res.status(403).json("Token no es válido!");
+    const usuId = userInfo.id;
+    const postId = req.params.id;
+    const q = "UPDATE posts SET post_likes = post_likes + 1 WHERE id = ? ";
+    const q2 = "INSERT INTO likes (`usu_id`, `post_id`, `b_like`) VALUES (?, ?, 1)";
+
+    db.query(q, [postId], (err, data) => {
+      if (err) return res.status(500).json(err);
+      db.query(q2, [usuId, postId], (err, data) => {
+        if (err) return res.status(500).json(err);
+        return res.status(200).json("El post ha sido actualizado");
+      });
+    });
+
+  });
+}
+
+export const dislikePost = (req, res) => {
+  const token = req.cookies.access_token;
+  if (!token) return res.status(401).json("No autenticado!");
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, userInfo) => {
+    if (err) return res.status(403).json("Token no es válido!");
+    const usuId = userInfo.id;
+    const postId = req.params.id;
+    const q = "UPDATE posts SET post_dislikes = post_dislikes + 1 WHERE id = ? ";
+    const q2 = "INSERT INTO likes (`usu_id`, `post_id`, `b_like`) VALUES (?, ?, 0)";
+
+    db.query(q, [postId], (err, data) => {
+      if (err) return res.status(500).json(err);
+      db.query(q2, [usuId, postId], (err, data) => {
+        if (err) return res.status(500).json(err);
+        return res.status(200).json("El post ha sido actualizado");
+      });
+    });
+
+  });
+}

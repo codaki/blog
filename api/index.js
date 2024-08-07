@@ -12,15 +12,42 @@ import postRoutes from "./routes/posts.js";
 import userRoutes from "./routes/users.js";
 
 const app = express();
-app.set("trust proxy", 1);
+app.set("trust proxy", 1); // Configurar proxy de confianza
+
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: "https://localhost:3000",
   credentials: true,
   methods: "GET,PUT,POST,DELETE",
 };
 app.use(cors(corsOptions));
 
 app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "example.com"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "example.com"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  })
+);
+app.use(helmet.frameguard({ action: "deny" }));
+app.use(helmet.xssFilter());
+app.use(helmet.noSniff());
+app.use(
+  helmet.hsts({ maxAge: 63072000, includeSubDomains: true, preload: true })
+);
+
+// Eliminar cabeceras innecesarias para ocultar la tecnología del servidor
+app.use((req, res, next) => {
+  res.removeHeader("X-Powered-By");
+  next();
+});
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -64,10 +91,7 @@ const options = {
 };
 
 const httpsServer = https.createServer(options, app);
-app.use((req, res, next) => {
-  console.log(`Request received by instance ${process.env.INSTANCE_NAME}`);
-  next();
-});
+
 httpsServer.listen(8800, () => {
   console.log("Conectado puerto 8800!");
 });

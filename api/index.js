@@ -6,10 +6,15 @@ import fs from "fs";
 import helmet from "helmet";
 import https from "https";
 import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import comentRoutes from "./routes/coment.js";
 import postRoutes from "./routes/posts.js";
 import userRoutes from "./routes/users.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.set("trust proxy", 1); // Configurar proxy de confianza
@@ -26,11 +31,11 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "example.com"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "example.com"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://trustedscripts.example.com"],
+      styleSrc: ["'self'", "https://trustedstyles.example.com"],
+      imgSrc: ["'self'", "data:", "https://trustedimages.example.com"],
+      connectSrc: ["'self'", "https://api.example.com"],
+      fontSrc: ["'self'", "https://trustedfonts.example.com"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
     },
@@ -83,6 +88,22 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/coment", comentRoutes);
+
+// Servir archivos estáticos
+const publicPath = path.join(__dirname, "public");
+app.use(express.static(publicPath));
+
+// Añadir cabeceras Cache-Control
+app.use((req, res, next) => {
+  if (req.url === "/robots.txt" || req.url === "/sitemap.xml") {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  } else if (req.url.startsWith("/public/")) {
+    res.setHeader("Cache-Control", "public, max-age=31536000");
+  } else {
+    res.setHeader("Cache-Control", "no-cache");
+  }
+  next();
+});
 
 // Configuración de HTTPS
 const options = {
